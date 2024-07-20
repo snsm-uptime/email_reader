@@ -1,10 +1,17 @@
+
 import email
 import imaplib
 import logging
 from email.message import Message
-from typing import List, Optional
+from typing import List, Optional, Tuple
+
+from .decorators import timed_operation
+
+
+from .models import EmailMessageModel
 
 from .imap_search_criteria import IMAPSearchCriteria
+from .parser import encode_cursor, decode_cursor
 
 
 class EmailClient:
@@ -27,7 +34,8 @@ class EmailClient:
                 f'Failed to connect to the email server: {e}')
             raise
 
-    def fetch_email_ids(self, criteria: IMAPSearchCriteria) -> Optional[List[str]]:
+    @timed_operation
+    def fetch_email_ids(self, criteria: IMAPSearchCriteria) -> Tuple[Optional[List[str]], float]:
         try:
             status, data = self.connection.search(None, criteria.build())
             if status == 'OK':
@@ -37,7 +45,8 @@ class EmailClient:
             self.logger.exception(f'Error fetching email IDs: {e}')
         return None
 
-    def get_emails(self, email_ids: List[str]) -> List[Message]:
+    @timed_operation
+    def fetch_emails_by_ids(self, email_ids: List[str]) -> Tuple[List[Message], float]:
         emails: List[Message] = []
         for email_id in email_ids:
             try:

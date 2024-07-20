@@ -10,7 +10,6 @@ class Settings(BaseSettings):
         env_file_encoding='utf-8',
         extra="ignore"
     )
-    EMAIL_MAILBOX: str
     EMAIL_PASSWORD: str
     EMAIL_USER: str
     ENVIRONMENT: Literal['local', 'dev', 'prod'] = 'local'

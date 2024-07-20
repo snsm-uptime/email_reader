@@ -2,10 +2,17 @@ from datetime import datetime
 from enum import Enum
 from typing import Generic, List, Optional, TypeVar
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 T = TypeVar('T')
 D = TypeVar('D', bound=BaseModel)
+
+
+class DateRange(BaseModel):
+    start_date: datetime = Field(...,
+                                 description="Start date in ISO format (YYYY-MM-DD)")
+    end_date: datetime = Field(...,
+                               description="End date in ISO format (YYYY-MM-DD)")
 
 
 class PaginationMeta(BaseModel):
