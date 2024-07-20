@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "email-reader"
+version = "0.1.0"
+description = "Rest API for your personal email"
+authors = ["Sebastian Soto M"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+email-validator = "^2.2.0"
+pydantic = "^2.8.2"
+fastapi = "^0.111.1"
+pydantic-settings = "^2.3.4"
+debugpy = "^1.8.2"
+uvicorn = "^0.30.1"
+
+[tool.poetry.group.dev.dependencies]
+autopep8 = "^2.2.0"
+rope = "^1.13.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

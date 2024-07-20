@@ -1,0 +1,13 @@
+services:
+  api:
+    container_name: api
+    image: appsuptime:email-reader
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
