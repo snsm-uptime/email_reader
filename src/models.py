@@ -1,3 +1,7 @@
+from pydantic import BaseModel, Field
+from typing import Optional
+import base64
+import json
 from datetime import datetime
 from enum import Enum
 from typing import Generic, List, Optional, TypeVar
@@ -57,3 +61,62 @@ class EmailMessageModel(BaseModel):
     to_emails: List[EmailStr] = []
     date: Optional[datetime]
     body: Optional[str]
+
+
+class CursorModel(BaseModel):
+    page_size: Optional[int] = Field(
+        default=10, description="The size of the page to fetch")
+    page: Optional[int] = Field(
+        default=1, description="The current page number")
+    cursor: Optional[str] = Field(
+        default=None, description="The cursor string for pagination")
+
+    def encode(self) -> str:
+        """
+        Encode the current page and page_size into a base64 cursor string.
+
+        Returns:
+            str: The base64 encoded cursor string.
+        """
+        cursor_data = {"page": self.page, "page_size": self.page_size}
+        cursor_str = json.dumps(cursor_data)
+        self.cursor = base64.urlsafe_b64encode(cursor_str.encode()).decode()
+        return self.cursor
+
+    @staticmethod
+    def encode_from_dict(page: int, page_size: int) -> str:
+        """
+        Encode given page and page_size into a base64 cursor string.
+
+        Args:
+            page (int): The current page number.
+            page_size (int): The size of the page to fetch.
+
+        Returns:
+            str: The base64 encoded cursor string.
+        """
+        cursor_data = {"page": page, "page_size": page_size}
+        cursor_str = json.dumps(cursor_data)
+        return base64.urlsafe_b64encode(cursor_str.encode()).decode()
+
+    @staticmethod
+    def decode(cursor: str) -> 'CursorModel':
+        """
+        Decode a base64 cursor string into a CursorModel instance.
+
+        Args:
+            cursor (str): The base64 encoded cursor string.
+
+        Returns:
+            CursorModel: A CursorModel instance with page and page_size populated.
+        """
+        try:
+            cursor_str = base64.urlsafe_b64decode(cursor.encode()).decode()
+            data = json.loads(cursor_str)
+            return CursorModel(
+                page=data.get('page', None),
+                page_size=data.get('page_size', None),
+                cursor=cursor
+            )
+        except (base64.binascii.Error, json.JSONDecodeError) as e:
+            raise ValueError("Invalid cursor format") from e
