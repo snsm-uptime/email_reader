@@ -8,10 +8,7 @@ from typing import List, Optional, Tuple
 from .decorators import timed_operation
 
 
-from .models import EmailMessageModel
-
 from .imap_search_criteria import IMAPSearchCriteria
-from .parser import encode_cursor, decode_cursor
 
 
 class EmailClient:

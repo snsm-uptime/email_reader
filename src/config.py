@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     )
     EMAIL_PASSWORD: str
     EMAIL_USER: str
+    PAGE_SIZE: int = 15
     ENVIRONMENT: Literal['local', 'dev', 'prod'] = 'local'
 
 
