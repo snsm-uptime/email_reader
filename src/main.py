@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, FastAPI, Path, Query
 
 
 from .config import config
-from .logging import configure_root_logger
+from .utils.logging import configure_root_logger
 from .models import (ApiResponse, DateRange, EmailMessageModel, ImapServer, Meta,
                      PaginatedResponse, CursorModel)
 from .service import EmailService
