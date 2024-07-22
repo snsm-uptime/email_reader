@@ -1,7 +1,7 @@
 from email.message import Message
 from email.utils import parsedate_to_datetime
 
-from .models import EmailMessageModel
+from ..models import EmailMessageModel
 
 
 def parse_email_message(msg: Message) -> EmailMessageModel:

@@ -3,12 +3,12 @@ from datetime import datetime
 from http import HTTPStatus
 from typing import Callable, List, Optional, Tuple
 
-from .cache import LRUCache
+from .utils.cache import LRUCache
 from .client import EmailClient
-from .imap_search_criteria import IMAPSearchCriteria
+from .utils.imap_search_criteria import IMAPSearchCriteria
 from .models import (ApiResponse, CursorModel, EmailMessageModel, ImapServer,
                      Meta, PaginatedResponse, PaginationMeta)
-from .parser import parse_email_message
+from .utils.parser import parse_email_message
 
 
 class EmailService:
