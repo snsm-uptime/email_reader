@@ -1,3 +1,4 @@
+import logging
 from typing import Literal
 from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -12,6 +13,9 @@ class Settings(BaseSettings):
     )
     EMAIL_PASSWORD: str
     EMAIL_USER: str
+    PAGE_SIZE: int = 15
+    CACHE_CAPACITY_EMAIL_ID_LIST: int = 5
+    CACHE_CAPACITY_EMAIL_MODEL_LIST: int = 5
     ENVIRONMENT: Literal['local', 'dev', 'prod'] = 'local'
 
 
