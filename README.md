@@ -15,7 +15,6 @@ CACHE_CAPACITY_EMAIL_MODEL_LIST: int = 5
 ENVIRONMENT: Literal['local', 'dev', 'prod'] = 'local'
 ```
 
-# TODO: Future Improvements
-- [ ] Filter by sender
-- [ ] Filter by subject
-- [x] Catch generic exception (focused on base model exception details)
+# Documentation
+
+- Go to `localhost:80/docs` for swagger api documentation
