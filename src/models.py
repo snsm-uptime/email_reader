@@ -142,3 +142,13 @@ class CursorModel(BaseModel):
             )
         except (base64.binascii.Error, json.JSONDecodeError) as e:
             raise ValueError("Invalid cursor format") from e
+
+
+class PydanticValidationError(BaseModel):
+    field: Optional[str] = None
+    message: Optional[str] = None
+    error: Optional[str] = None
+    input: Optional[str] = None
+
+    def __str__(self):
+        return f"[{self.field}={self.input}] {self.message}"
