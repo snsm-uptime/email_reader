@@ -15,4 +15,6 @@ RUN poetry install --without dev --no-root && rm -rf ${POETRY_CACHE_DIR}
 
 COPY ./src ./src
 
+EXPOSE 80
+
 ENTRYPOINT ["poetry", "run", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "80"]

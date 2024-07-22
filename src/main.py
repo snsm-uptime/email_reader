@@ -1,3 +1,4 @@
+from http import HTTPStatus
 import logging
 import os
 from typing import Optional
@@ -7,7 +8,8 @@ from fastapi import APIRouter, Depends, FastAPI, Path, Query
 
 
 from .config import config
-from .models import (ApiResponse, DateRange, EmailMessageModel, ImapServer,
+from .logging import configure_root_logger
+from .models import (ApiResponse, DateRange, EmailMessageModel, ImapServer, Meta,
                      PaginatedResponse, CursorModel)
 from .service import EmailService
 
@@ -15,6 +17,8 @@ app = FastAPI()
 
 router = APIRouter()
 
+configure_root_logger(
+    log_level=logging.INFO if config.ENVIRONMENT == 'prod' else logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
@@ -35,13 +39,21 @@ async def read_emails(
         None, description="Number of items per page")
 ):
     email_service.mailbox = mailbox
-    cursor = CursorModel(
-        page=page if page else 1, page_size=page_size if page_size else config.PAGE_SIZE, cursor=cursor)
-    response = email_service.get_paginated(
-        start_date=date_range.start_date,
-        end_date=date_range.end_date,
-        cursor=cursor
-    )
-    return response
+    try:
+        cursor = CursorModel(
+            page=page, page_size=page_size, cursor=cursor)
+        response = email_service.get_paginated(
+            start_date=date_range.start_date,
+            end_date=date_range.end_date,
+            cursor=cursor
+        )
+        return response
+    except ValueError as e:
+        return ApiResponse(
+            meta=Meta(
+                status=HTTPStatus.BAD_REQUEST,
+                message='.\n'.join([err.get('msg') for err in e.errors()])
+            )
+        )
 
 app.include_router(router)

@@ -25,7 +25,7 @@ class EmailClient:
             self.connection = imaplib.IMAP4_SSL(self.server)
             self.connection.login(self.email_user, self.email_pass)
             self.connection.select(self.mailbox)
-            self.logger.info('Connected to the email server')
+            self.logger.debug('Connected to the email server')
         except Exception as e:
             self.logger.exception(
                 f'Failed to connect to the email server: {e}')
@@ -65,7 +65,7 @@ class EmailClient:
         if self.connection:
             try:
                 self.connection.logout()
-                self.logger.info('Disconnected from the email server')
+                self.logger.debug('Disconnected from the email server')
             except Exception as e:
                 self.logger.error(
                     f'Failed to disconnect from the email server: {e}')
