@@ -18,3 +18,4 @@ ENVIRONMENT: Literal['local', 'dev', 'prod'] = 'local'
 # TODO: Future Improvements
 - [ ] Filter by sender
 - [ ] Filter by subject
+- [x] Catch generic exception (focused on base model exception details)
