@@ -1,21 +1,14 @@
-from typing import Callable, List, Optional, Tuple, TypeVar
-from http import HTTPStatus
 import logging
-from typing import Callable, List, Optional, TypeVar
-
-from .models import CursorModel
-from .cache import LRUCache
-
-from fastapi import HTTPException
 from datetime import datetime
+from http import HTTPStatus
+from typing import Callable, List, Optional, Tuple
 
-from .config import config
+from .cache import LRUCache
 from .client import EmailClient
 from .imap_search_criteria import IMAPSearchCriteria
-from .parser import encode_cursor, decode_cursor, parse_email_message
-from .models import (
-    Meta, PaginationMeta, PaginatedResponse, ApiResponse, EmailMessageModel, ImapServer
-)
+from .models import (ApiResponse, CursorModel, EmailMessageModel, ImapServer,
+                     Meta, PaginatedResponse, PaginationMeta)
+from .parser import parse_email_message
 
 
 class EmailService:

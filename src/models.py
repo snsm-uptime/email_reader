@@ -1,13 +1,12 @@
-from pydantic import BaseModel, Field, model_validator, root_validator
-from .config import config
-from typing import Optional
 import base64
+import json
 from datetime import datetime
 from enum import Enum
-import json
 from typing import Generic, List, Optional, TypeVar
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, model_validator
+
+from .config import config
 
 T = TypeVar('T')
 D = TypeVar('D', bound=BaseModel)

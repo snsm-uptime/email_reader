@@ -1,4 +1,3 @@
-
 import email
 import imaplib
 import logging
@@ -6,8 +5,6 @@ from email.message import Message
 from typing import List, Optional, Tuple
 
 from .decorators import timed_operation
-
-
 from .imap_search_criteria import IMAPSearchCriteria
 
 

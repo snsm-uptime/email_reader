@@ -1,9 +1,7 @@
 from http import HTTPStatus
 import logging
-import os
 from typing import Optional
 
-import debugpy
 from fastapi import APIRouter, Depends, FastAPI, Path, Query
 
 
