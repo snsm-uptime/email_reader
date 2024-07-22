@@ -1,7 +1,7 @@
-import time
 import logging
+import time
 from functools import wraps
-from typing import Callable, TypeVar, Tuple, Any
+from typing import Any, Callable, Tuple, TypeVar
 
 logger = logging.getLogger(__name__)
 
