@@ -1,5 +1,5 @@
 services:
-  api:
+  email_reader:
     container_name: email-api
     image: appsuptime:email-reader
     build:
