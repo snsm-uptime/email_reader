@@ -58,11 +58,11 @@ class IMAPSearchCriteria:
 
     def and_(self, *criteria):
         combined = ' '.join(f'({c})' for c in criteria)
-        self.criteria.append(f'({combined})')
+        self.criteria.append(combined)
         return self
 
     def or_(self, *criteria):
-        combined = ' '.join(criteria)
+        combined = ' '.join(f'({c})' for c in criteria)
         self.criteria.append(f'(OR {combined})')
         return self
 
