@@ -20,7 +20,7 @@ def decode_quoted_printable(encoded_str: str) -> str:
     return decoded_bytes.decode('utf-8')
 
 
-def decode_subject(subject: str) -> str:
+def decode(subject: str) -> str:
     """Decode an email subject that might be encoded."""
     decoded_header = str(make_header(decode_header(subject)))
     return decoded_header
@@ -39,8 +39,8 @@ def decode_match(encoded_str: str) -> str:
 
 
 def parse_email_message(msg: Message) -> EmailMessageModel:
-    subject = decode_subject(msg.get('subject'))
-    from_email = msg.get('from')
+    subject = decode(msg.get('subject'))
+    from_email = decode(msg.get('from'))
     to_emails = msg.get_all('to', [])
     date = msg.get('date')
 
