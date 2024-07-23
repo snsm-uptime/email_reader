@@ -42,7 +42,6 @@ def decode_match(encoded_str: str) -> str:
 
 
 def parse_email_message(msg: Message) -> EmailMessageModel:
-    logger = getLogger('parse_email_message')
 
     def parse_message_body(msg: Message) -> str:
         try:
@@ -50,10 +49,6 @@ def parse_email_message(msg: Message) -> EmailMessageModel:
                 for part in msg.walk():
                     content_type = part.get_content_type()
                     content_disposition = part.get("Content-Disposition")
-
-                    logger.debug(f"Part content type: {content_type}")
-                    logger.debug(
-                        f"Part content disposition: {content_disposition}")
 
                     # Process parts even if Content-Disposition is missing or not an attachment
                     if content_disposition is None or "attachment" not in content_disposition:
@@ -66,9 +61,6 @@ def parse_email_message(msg: Message) -> EmailMessageModel:
                             elif "text/html" in content_type:
                                 soup = BeautifulSoup(body, "html.parser")
                                 return soup.get_text(separator='\n').strip()
-                        else:
-                            logger.debug(
-                                f"No payload to decode in part with content type: {content_type}")
             else:
                 content_type = msg.get_content_type()
                 payload = msg.get_payload(decode=True)
@@ -80,13 +72,9 @@ def parse_email_message(msg: Message) -> EmailMessageModel:
                     elif "text/html" in content_type:
                         soup = BeautifulSoup(body, "html.parser")
                         return soup.get_text(separator='\n').strip()
-                else:
-                    logger.debug(
-                        f"No payload to decode in message with content type: {content_type}")
-        except Exception as e:
-            logger.exception(f"Failed to parse email body: {e}")
             return None
-        return None
+        except Exception as e:
+            raise e
 
     subject = decode(msg.get('subject'))
     from_email = decode(msg.get('from'))

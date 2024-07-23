@@ -89,21 +89,29 @@ class EmailService:
 
         criteria = IMAPSearchCriteria().date_range(start_date, end_date)
 
+        and_conditions: list[str] = []
+
         if senders:
             if len(senders) > 1:
                 sender_conditions = [IMAPSearchCriteria().from_(
                     sender).build() for sender in senders]
-                criteria.or_(*sender_conditions)
+                and_conditions.append(
+                    IMAPSearchCriteria().or_(*sender_conditions).build())
             else:
-                criteria.from_(senders[0])
+                and_conditions.append(
+                    IMAPSearchCriteria().from_(senders[0]).build())
 
         if subjects:
             if len(subjects) > 1:
                 subject_conditions = [IMAPSearchCriteria().subject(
                     subject).build() for subject in subjects]
-                criteria.or_(*subject_conditions)
+                and_conditions.append(IMAPSearchCriteria().or_(
+                    *subject_conditions).build())
             else:
-                criteria.subject(subjects[0])
+                and_conditions.append(
+                    IMAPSearchCriteria().subject(subjects[0]).build())
+
+        criteria.and_(*and_conditions)
 
         cache_key = self._generate_cache_key(criteria)
 
