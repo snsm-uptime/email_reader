@@ -1,6 +1,6 @@
 services:
   api:
-    container_name: api
+    container_name: email-api
     image: appsuptime:email-reader
     build:
       context: .
