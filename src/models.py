@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Generic, List, Optional, TypeVar
 
-from pydantic import BaseModel, EmailStr, Field, model_validator
+from pydantic import BaseModel, EmailStr, Field, NameEmail, model_validator
 
 from .config import config
 
@@ -57,7 +57,7 @@ class ImapServer(Enum):
 
 class EmailMessageModel(BaseModel):
     subject: Optional[str]
-    from_email: Optional[EmailStr]
+    from_email: Optional[NameEmail]
     to_emails: List[EmailStr] = []
     date: Optional[datetime]
     body: Optional[str]

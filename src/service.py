@@ -40,10 +40,10 @@ class EmailService:
                 if not email_ids:
                     return ApiResponse(
                         meta=Meta(
-                            status=HTTPStatus.NO_CONTENT,
+                            status=HTTPStatus.PARTIAL_CONTENT,
                             message=f"No emails found for the given criteria = {
-                                criteria}"
-                        )), time_ids
+                                query}"
+                        ), data=[]), time_ids
                 self.ids_cache.put(cache_key, email_ids)
                 self.logger.info(
                     f'[CACHE:SAVED] {len(email_ids)} for {query} | {cache_key}')
@@ -69,7 +69,8 @@ class EmailService:
             self.logger.info(f'Used emails cache for {criteria.build()}')
 
         response = ApiResponse(
-            meta=Meta(status=200),
+            meta=Meta(status=HTTPStatus.OK if len(emails)
+                      > 0 else HTTPStatus.PARTIAL_CONTENT),
             data=PaginatedResponse(
                 items=[parse_email_message(email) for email in emails]
             )
@@ -81,10 +82,29 @@ class EmailService:
         start_date: datetime,
         end_date: datetime,
         cursor: CursorModel,
-        filter: Optional[Callable[[EmailMessageModel], bool]] = None
+        senders: Optional[List[str]] = None,
+        subjects: Optional[List[str]] = None,
+        filter_criteria: Optional[Callable[[EmailMessageModel], bool]] = None,
     ) -> ApiResponse[PaginatedResponse[EmailMessageModel]]:
 
         criteria = IMAPSearchCriteria().date_range(start_date, end_date)
+
+        if senders:
+            if len(senders) > 1:
+                sender_conditions = [IMAPSearchCriteria().from_(
+                    sender).build() for sender in senders]
+                criteria.or_(*sender_conditions)
+            else:
+                criteria.from_(senders[0])
+
+        if subjects:
+            if len(subjects) > 1:
+                subject_conditions = [IMAPSearchCriteria().subject(
+                    subject).build() for subject in subjects]
+                criteria.or_(*subject_conditions)
+            else:
+                criteria.subject(subjects[0])
+
         cache_key = self._generate_cache_key(criteria)
 
         # 2. Get email ids
@@ -102,13 +122,16 @@ class EmailService:
         email_response, time_emails = self.__get_emails_by_id(
             cache_key, paginated_email_ids, criteria, cursor)
 
+        if email_response.meta == HTTPStatus.PARTIAL_CONTENT:
+            return email_response
+
         emails = email_response.data.items
         filtered_total_items = total_items
-        if filter:
-            page_total_items = len(email_response)
+        if filter_criteria:
+            page_total_items = len(emails)
             self.logger.info(f'Found {page_total_items} emails initially')
 
-            emails = list(filter(filter, email_response.data.items))
+            emails = list(filter(filter_criteria, email_response.data.items))
             filtered_total_items = len(emails)
             email_response.data.items = emails
 
@@ -141,4 +164,5 @@ class EmailService:
         email_response.meta.request_time = elapsed_time
         msg = f'TOTAL={total_items},Filtered={filtered_total_items}'
         email_response.meta.message = msg
+
         return email_response
