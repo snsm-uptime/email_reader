@@ -1,11 +1,14 @@
 import base64
 import quopri
 import re
+from email.header import decode_header, make_header
 from email.message import Message
 from email.utils import parsedate_to_datetime
+from logging import getLogger
+
+from bs4 import BeautifulSoup
 
 from ..models import EmailMessageModel
-from email.header import decode_header, make_header
 
 
 def decode_base64(encoded_str: str) -> str:
@@ -39,6 +42,52 @@ def decode_match(encoded_str: str) -> str:
 
 
 def parse_email_message(msg: Message) -> EmailMessageModel:
+    logger = getLogger('parse_email_message')
+
+    def parse_message_body(msg: Message) -> str:
+        try:
+            if msg.is_multipart():
+                for part in msg.walk():
+                    content_type = part.get_content_type()
+                    content_disposition = part.get("Content-Disposition")
+
+                    logger.debug(f"Part content type: {content_type}")
+                    logger.debug(
+                        f"Part content disposition: {content_disposition}")
+
+                    # Process parts even if Content-Disposition is missing or not an attachment
+                    if content_disposition is None or "attachment" not in content_disposition:
+                        payload = part.get_payload(decode=True)
+                        if payload:
+                            charset = part.get_content_charset() or "utf-8"
+                            body = payload.decode(charset, errors="replace")
+                            if "text/plain" in content_type:
+                                return body
+                            elif "text/html" in content_type:
+                                soup = BeautifulSoup(body, "html.parser")
+                                return soup.get_text(separator='\n').strip()
+                        else:
+                            logger.debug(
+                                f"No payload to decode in part with content type: {content_type}")
+            else:
+                content_type = msg.get_content_type()
+                payload = msg.get_payload(decode=True)
+                if payload:
+                    charset = msg.get_content_charset() or "utf-8"
+                    body = payload.decode(charset, errors="replace")
+                    if "text/plain" in content_type:
+                        return body
+                    elif "text/html" in content_type:
+                        soup = BeautifulSoup(body, "html.parser")
+                        return soup.get_text(separator='\n').strip()
+                else:
+                    logger.debug(
+                        f"No payload to decode in message with content type: {content_type}")
+        except Exception as e:
+            logger.exception(f"Failed to parse email body: {e}")
+            return None
+        return None
+
     subject = decode(msg.get('subject'))
     from_email = decode(msg.get('from'))
     to_emails = msg.get_all('to', [])
@@ -48,25 +97,10 @@ def parse_email_message(msg: Message) -> EmailMessageModel:
     if date:
         date = parsedate_to_datetime(date)
 
-    # Extract the body of the email
-    if msg.is_multipart():
-        body = ''
-        for part in msg.walk():
-            content_type = part.get_content_type()
-            content_disposition = str(part.get("Content-Disposition"))
-            if "attachment" not in content_disposition:
-                if content_type == "text/plain":
-                    body = part.get_payload(decode=True).decode(
-                        part.get_content_charset(), errors="replace")
-                    break
-    else:
-        body = msg.get_payload(decode=True).decode(
-            msg.get_content_charset(), errors="replace")
-
     return EmailMessageModel(
         subject=subject,
         from_email=from_email,
         to_emails=to_emails,
         date=date,
-        body=body
+        body=parse_message_body(msg)
     )
