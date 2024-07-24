@@ -7,14 +7,13 @@ from fastapi import APIRouter, Depends, FastAPI, Path, Query, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from pydantic import EmailStr
 
 from .config import config
 from .models import (ApiResponse, CursorModel, DateRange, EmailMessageModel,
                      ImapServer, Meta, PaginatedResponse,
                      PydanticValidationError)
 from .service import EmailService
-from .utils import catch_standard_errors, configure_root_logger
+from .utils import configure_root_logger
 
 app = FastAPI()
 
@@ -60,6 +59,17 @@ async def custom_request_validation_exception_handler(request: Request, exc: Req
     )
 
     return JSONResponse(status_code=meta.status, content={"meta": meta.model_dump()})
+
+
+@app.exception_handler(ValueError)
+async def custom_validation_exception_handler(request: Request, exc: ValueError):
+    errors = '. '.join(exc.args)
+    status_code = HTTPStatus.NOT_ACCEPTABLE
+    return JSONResponse(
+        status_code=status_code,
+        content={
+            "meta": Meta(status=status_code, message=errors).model_dump()
+        })
 
 
 @app.get("/{mailbox}", response_model=ApiResponse[PaginatedResponse[EmailMessageModel]])

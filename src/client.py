@@ -18,15 +18,13 @@ class EmailClient:
         self.logger = logging.getLogger(__name__)
 
     def connect(self):
-        try:
-            self.connection = imaplib.IMAP4_SSL(self.server)
-            self.connection.login(self.email_user, self.email_pass)
-            self.connection.select(self.mailbox)
-            self.logger.debug('Connected to the email server')
-        except Exception as e:
-            self.logger.exception(
-                f'Failed to connect to the email server: {e}')
-            raise
+        self.connection = imaplib.IMAP4_SSL(self.server)
+        self.connection.login(self.email_user, self.email_pass)
+        status, msg = self.connection.select(self.mailbox)
+        if status != 'OK':
+            raise ValueError(
+                '.'.join(text.decode('utf-8') for text in msg))
+        self.logger.debug('Connected to the email server')
 
     @timed_operation
     def fetch_email_ids(self, criteria: IMAPSearchCriteria) -> Tuple[Optional[List[str]], float]:
