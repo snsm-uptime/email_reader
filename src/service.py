@@ -179,7 +179,7 @@ class EmailService:
         # add complete time elapsed
         elapsed_time = time_emails + time_ids
         email_response.meta.request_time = elapsed_time
-        msg = f'TOTAL={total_items},Filtered={filtered_total_items}'
+        msg = f'Found {total_items} items with this query: {criteria.build()}'
         email_response.meta.message = msg
 
         return email_response
