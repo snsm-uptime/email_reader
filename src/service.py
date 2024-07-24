@@ -111,7 +111,8 @@ class EmailService:
                 and_conditions.append(
                     IMAPSearchCriteria().subject(subjects[0]).build())
 
-        criteria.and_(*and_conditions)
+        if and_conditions:
+            criteria.and_(*and_conditions)
 
         cache_key = self._generate_cache_key(criteria)
 
