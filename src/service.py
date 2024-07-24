@@ -16,16 +16,24 @@ class EmailService:
         self.email_user = email_user
         self.email_pass = email_pass
         self.server = server
-        self.mailbox = mailbox
+        self.__mailbox = mailbox
         self.ids_cache = LRUCache[List[str]](capacity=3)
         self.email_cache = LRUCache[List[EmailMessageModel]](capacity=3)
         self.logger = logging.getLogger(self.__class__.__name__)
+
+    @property
+    def mailbox(self) -> str:
+        return self.__mailbox
+
+    @mailbox.setter
+    def mailbox(self, label: str):
+        self.__mailbox = label
 
     def _get_client(self) -> EmailClient:
         return EmailClient(email_user=self.email_user, email_pass=self.email_pass, server=self.server.value, mailbox=self.mailbox)
 
     def _generate_cache_key(self, criteria: IMAPSearchCriteria) -> str:
-        return hash(str(criteria.build()))
+        return hash(str(criteria.build())+self.mailbox)
 
     def __get_email_ids(self, cache_key: str, criteria: IMAPSearchCriteria) -> Tuple[ApiResponse | List[str], float]:
         email_ids = self.ids_cache.get(cache_key)

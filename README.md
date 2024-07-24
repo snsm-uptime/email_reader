@@ -1,6 +1,8 @@
 # Documentation
 
 - Go to `localhost:8001/docs` for swagger api documentation
+## Example
+http://localhost:8001/inbox?start_date=2024-01-01&end_date=2024-01-31&subject=google
 
 # Configuration
 ## Commands
