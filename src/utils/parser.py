@@ -1,4 +1,5 @@
 import base64
+import html
 import quopri
 import re
 from email.header import decode_header, make_header
@@ -26,7 +27,8 @@ def decode_quoted_printable(encoded_str: str) -> str:
 def decode(subject: str) -> str:
     """Decode an email subject that might be encoded."""
     decoded_header = str(make_header(decode_header(subject)))
-    return decoded_header
+    unescaped_header = html.unescape(decoded_header)
+    return unescaped_header
 
 
 def decode_match(encoded_str: str) -> str:
