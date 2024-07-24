@@ -1,6 +1,6 @@
 # Documentation
 
-- Go to `localhost:80/docs` for swagger api documentation
+- Go to `localhost:8001/docs` for swagger api documentation
 
 # Configuration
 ## Commands
@@ -16,6 +16,7 @@ EMAIL_PASSWORD=***
 EMAIL_USER=demo@gmail.com
 
 # These can be set in the config.py and .env
+# Can also be set in the environment of any dockerfile
 PAGE_SIZE: int = 15
 CACHE_CAPACITY_EMAIL_ID_LIST: int = 5
 CACHE_CAPACITY_EMAIL_MODEL_LIST: int = 5
