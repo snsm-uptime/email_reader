@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List, Optional
 
 
 class IMAPSearchCriteria:
@@ -72,3 +73,39 @@ class IMAPSearchCriteria:
 
     def build(self):
         return ' '.join(self.criteria)
+
+
+def define_criteria(
+    start_date: datetime,
+    end_date: datetime,
+    senders: Optional[List[str]] = None,
+    subjects: Optional[List[str]] = None,
+):
+    criteria = IMAPSearchCriteria().date_range(start_date, end_date)
+
+    and_conditions: list[str] = []
+
+    if senders:
+        if len(senders) > 1:
+            sender_conditions = [IMAPSearchCriteria().from_(
+                sender).build() for sender in senders]
+            and_conditions.append(
+                IMAPSearchCriteria().or_(*sender_conditions).build())
+        else:
+            and_conditions.append(
+                IMAPSearchCriteria().from_(senders[0]).build())
+
+    if subjects:
+        if len(subjects) > 1:
+            subject_conditions = [IMAPSearchCriteria().subject(
+                subject).build() for subject in subjects]
+            and_conditions.append(IMAPSearchCriteria().or_(
+                *subject_conditions).build())
+        else:
+            and_conditions.append(
+                IMAPSearchCriteria().subject(subjects[0]).build())
+
+    if and_conditions:
+        criteria.and_(*and_conditions)
+
+    return criteria

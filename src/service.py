@@ -7,7 +7,7 @@ from .client import EmailClient
 from .models import (ApiResponse, CursorModel, EmailMessageModel, ImapServer,
                      Meta, PaginatedResponse, PaginationMeta)
 from .utils.cache import LRUCache
-from .utils.imap_search_criteria import IMAPSearchCriteria
+from .utils.imap_search_criteria import IMAPSearchCriteria, define_criteria
 from .utils.parser import parse_email_message
 
 
@@ -51,7 +51,7 @@ class EmailService:
                             status=HTTPStatus.PARTIAL_CONTENT,
                             message=f"No emails found for the given criteria = {
                                 query}"
-                        ), data=[]), time_ids
+                        ), data=None), time_ids
                 self.ids_cache.put(cache_key, email_ids)
                 self.logger.info(
                     f'[CACHE:SAVED] {len(email_ids)} for {query} | {cache_key}')
@@ -95,33 +95,7 @@ class EmailService:
         filter_criteria: Optional[Callable[[EmailMessageModel], bool]] = None,
     ) -> ApiResponse[PaginatedResponse[EmailMessageModel]]:
 
-        criteria = IMAPSearchCriteria().date_range(start_date, end_date)
-
-        and_conditions: list[str] = []
-
-        if senders:
-            if len(senders) > 1:
-                sender_conditions = [IMAPSearchCriteria().from_(
-                    sender).build() for sender in senders]
-                and_conditions.append(
-                    IMAPSearchCriteria().or_(*sender_conditions).build())
-            else:
-                and_conditions.append(
-                    IMAPSearchCriteria().from_(senders[0]).build())
-
-        if subjects:
-            if len(subjects) > 1:
-                subject_conditions = [IMAPSearchCriteria().subject(
-                    subject).build() for subject in subjects]
-                and_conditions.append(IMAPSearchCriteria().or_(
-                    *subject_conditions).build())
-            else:
-                and_conditions.append(
-                    IMAPSearchCriteria().subject(subjects[0]).build())
-
-        if and_conditions:
-            criteria.and_(*and_conditions)
-
+        criteria = define_criteria(start_date, end_date, senders, subjects)
         cache_key = self._generate_cache_key(criteria)
 
         # 2. Get email ids
