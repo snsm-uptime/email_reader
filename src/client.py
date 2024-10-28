@@ -2,7 +2,10 @@ import email
 import imaplib
 import logging
 from email.message import Message
+from imaplib import IMAP4
 from typing import List, Optional, Tuple
+
+from .models import AuthException
 
 from .utils.decorators import timed_operation
 from .utils.imap_search_criteria import IMAPSearchCriteria
@@ -18,13 +21,17 @@ class EmailClient:
         self.logger = logging.getLogger(__name__)
 
     def connect(self):
-        self.connection = imaplib.IMAP4_SSL(self.server)
-        self.connection.login(self.email_user, self.email_pass)
-        status, msg = self.connection.select(self.mailbox)
-        if status != 'OK':
-            raise ValueError(
-                '.'.join(text.decode('utf-8') for text in msg))
-        self.logger.debug('Connected to the email server')
+        try:
+            self.connection = imaplib.IMAP4_SSL(self.server)
+            self.connection.login(self.email_user, self.email_pass)
+            status, msg = self.connection.select(self.mailbox)
+            if status != 'OK':
+                raise ValueError(
+                    '.'.join(text.decode('utf-8') for text in msg))
+            self.logger.debug('Connected to the email server')
+        except IMAP4.error as e:
+            raise AuthException(
+                "Unable to connect to Email Client with those credentials.")
 
     @timed_operation
     def fetch_email_ids(self, criteria: IMAPSearchCriteria) -> Tuple[Optional[List[str]], float]:

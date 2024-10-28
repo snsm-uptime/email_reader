@@ -9,7 +9,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from .config import config
-from .models import (ApiResponse, CursorModel, DateRange, EmailMessageModel,
+from .models import (ApiResponse, AuthException, CursorModel, DateRange, EmailMessageModel,
                      ImapServer, Meta, PaginatedResponse,
                      PydanticValidationError)
 from .service import EmailService
@@ -90,13 +90,21 @@ async def read_emails(
     cursor = CursorModel(
         page=page, page_size=page_size, cursor=cursor)
 
-    result = email_service.get_paginated(
-        start_date=date_range.start_date,
-        end_date=date_range.end_date,
-        cursor=cursor,
-        senders=senders.split(';') if senders else None,
-        subjects=subject
-    )
-    return JSONResponse(status_code=result.meta.status, content=jsonable_encoder(result.model_dump()))
+    try:
+        result = email_service.get_paginated(
+            start_date=date_range.start_date,
+            end_date=date_range.end_date,
+            cursor=cursor,
+            senders=senders.split(';') if senders else None,
+            subjects=subject
+        )
+        return JSONResponse(status_code=result.meta.status, content=jsonable_encoder(result.model_dump()))
+    except AuthException as ae:
+        return JSONResponse(
+            status_code=HTTPStatus.UNAUTHORIZED,
+            content=jsonable_encoder(ApiResponse(meta=Meta(
+                status=HTTPStatus.UNAUTHORIZED, message=ae.args[0], request_time=0.0)
+            )))
+
 
 app.include_router(router)

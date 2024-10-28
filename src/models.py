@@ -12,6 +12,10 @@ T = TypeVar('T')
 D = TypeVar('D', bound=BaseModel)
 
 
+class AuthException(Exception):
+    pass
+
+
 class DateRange(BaseModel):
     start_date: datetime = Field(...,
                                  description="Start date in ISO format (YYYY-MM-DD)")
