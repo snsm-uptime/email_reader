@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     PAGE_SIZE: int = 15
     CACHE_CAPACITY_EMAIL_ID_LIST: int = 5
     CACHE_CAPACITY_EMAIL_MODEL_LIST: int = 5
-    ENVIRONMENT: Literal['local', 'dev', 'prod'] = 'local'
+    ENVIRONMENT: Literal['local', 'development', 'production'] = 'local'
 
 
 config = Settings()
